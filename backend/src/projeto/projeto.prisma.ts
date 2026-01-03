@@ -1,4 +1,4 @@
-import { Projeto, Tecnologia } from '@core';
+import { Projeto } from '@core';
 import { Injectable } from '@nestjs/common';
 import { PrismaProvider } from 'src/db/prisma.provider';
 

@@ -1,0 +1,247 @@
+{
+  "name": "assistente-persoal",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assistente-pessoal",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6eacc1d7-3227-425a-b87b-50d920c9195f",
+      "name": "Webhook",
+      "webhookId": "bb1d3aeb-1263-4895-b5b8-605c503a9132"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.mensagem }}",
+        "options": {
+          "systemMessage": "Você é o assistente pessoal dentro do porfólio do desenvolvedor Gabriel Alves. Estou aberto para trabalhos e contratação por empresas. É possível acessar todos os projetos do portfolio pela tool Projetos e todas as tecnologias que eu tenho experiência pela tool Tecnologias. Caso você não conheça a resposta, pode solicitar o teleone com whatsapp para o Gabriel entrar em contato depois. Perguntas não relacionadas ao assunto9 com trabalho, projetos e tecnologias, podem ser educadamente negadas, pode usar humor nestas negativas."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a7d13fe4-42d6-4416-8344-f41a9276321f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "921719ab-4590-4235-a458-2b38ae622f44",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ex0XN54oJ9nPnkBG",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.chatId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        -128
+      ],
+      "id": "682dd542-938f-4d33-8add-54c968a1ff78",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "tecnologias"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        336,
+        208
+      ],
+      "id": "bc1774dd-7a91-42e3-924b-f6ab194397df",
+      "name": "Tecnologias",
+      "credentials": {
+        "supabaseApi": {
+          "id": "N6ga2FKHxR2zUpE9",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "projetos"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        448,
+        208
+      ],
+      "id": "0556bf69-b65c-4200-b049-fc9a21754230",
+      "name": "Projetos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "N6ga2FKHxR2zUpE9",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "06190d09-0881-455b-aff0-5d2cad7050a7",
+              "name": "resposta",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        528,
+        -32
+      ],
+      "id": "d72ccd18-e7af-4643-bb18-a952bbba739e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        736,
+        -32
+      ],
+      "id": "7f6a53f7-1957-4e03-87de-c60aaf022704",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tecnologias": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Projetos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "a0e5306c-f3bb-41cb-8067-1c38098079a4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7e8ae068ab3ba73fe4616299da27b46115aaddc9949c26b0588607a3f36e9564"
+  },
+  "id": "a9YLtWZKfUQkl3Xa",
+  "tags": []
+}
